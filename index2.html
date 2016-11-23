@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<style>
+body {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+.bar {
+  fill: steelblue;
+}
+svg{
+  display: block;
+margin: auto;
+}
+</style>
+</head>
+<body align="center">
+
+<h2 align="center">stacked chart of rice production in the 4 southern states<h2>
+<div id="content1"></div>
+<button onclick="location.href='oilseed.html';">Commercial Grap</button>
+<button onclick="location.href='foodgrains.html';">Oilseeds Graph</button>
+<button onclick="location.href='foodgrains.html';">Foodgrains Graph</button>
+
+<script src="http://d3js.org/d3.v4.min.js"></script>
+<script>
+
+// set the dimensions of the canvas
+var findZero;
+var margin = {top: 20, right: 20, bottom: 20, left: 40},
+width = 1000 - margin.left - margin.right,
+height = 600 - margin.top - margin.bottom;
+
+// set the ranges
+var x = d3.scaleBand().rangeRound([0, width]).padding(0.1);
+var y = d3.scaleLinear().rangeRound([height, 0]);
+var color =d3.scaleOrdinal().range(["#013835", "#03847e", "#580999", "#6b486b"]);
+
+
+// add the SVG element
+var svg = d3.select("body").append("svg")
+.attr("width", width + margin.left + margin.right)
+.attr("height", height + margin.top + margin.bottom)
+.append("g")
+.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+// load the data
+d3.json ("stateData.json", function (error, data) {
+color.domain(d3.keys(data[0]).filter(function(Year) { console.log(Year);return Year !== "Year"; }));
+data.forEach(function(d) {
+var y0 = 0;
+d.concent = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+d.total = d.concent[d.concent.length - 1].y1;
+});
+
+
+// scale the range of the data
+x.domain(data.map(function(d) { return d.Year; }));
+y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+console.log();
+
+ // add axis
+ svg.append("g")
+.attr("class", "x axis")
+.attr("transform", "translate(0," + height + ")")
+.call(d3.axisBottom(x))
+svg.append("g")
+.attr("class", "y axis")
+.call(d3.axisLeft(y))
+.append("text")
+.attr("transform", "rotate(-90)")
+.attr("y", 6)
+.attr("dy", ".71em")
+.style("text-anchor", "end")
+.text("Rice Production measured in ton");
+
+
+ // add axis
+var Year = svg.selectAll(".Year")
+.data(data)
+.enter().append("g")
+.attr("class", "g")
+.attr("transform", function(d) { return "translate(" + x(d.Year) + ",0)"; });
+Year.selectAll("rect")
+.data(function(d) { return d.concent; })
+.enter().append("rect")
+.attr("width", x.bandwidth())
+.attr("y", function(d) { return y(d.y1); })
+.attr("height", function(d) { return y(d.y0) - y(d.y1); })
+.style("fill", function(d) {return color(d.name);});
+
+ // add legends
+var legend = svg.selectAll(".legend")
+    .data(color.domain().slice().reverse())
+    .enter().append("g")
+    .attr("class", "legend")
+    .attr("transform", function(d, i) { return "translate(0," + i * 30 + ")"; });
+    legend.append("rect")
+    .attr("x", width - 494)
+    .attr("width", 18)
+    .attr("height", 18)
+    .style("fill", color);
+    legend.append("text")
+    .attr("x", width - 500)
+    .attr("y", 9)
+    .attr("dy", ".35em")
+    .style("text-anchor", "end")
+    .text(function(d) { return d; });
+
+
+
+});
+</script>
+</body>
+</html>

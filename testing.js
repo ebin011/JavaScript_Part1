@@ -17,7 +17,7 @@ var lineByLine = [];
 	var Index2013=heading.indexOf(" 3-2013")+1;
 	var Index1993=heading.indexOf(" 3-1993")+1;
 
-	//For the year 2013, plot the all oilseed crop type vs .production, in descending order.
+	//console.log(heading);
 	lineByLine.map(function(item)
 	{   
 		
@@ -43,12 +43,12 @@ var lineByLine = [];
 	oilseedArray.sort(function(a,b){
   return b.value - a.value;
 });
-	fs.writeFileSync("JsonFiles/Oilseeds.json",JSON.stringify(oilseedArray),encoding="utf8");
-oilseedArray.map(function(item){
+//fs.writeFileSync("JsonFiles/Oilseeds.json",JSON.stringify(oilseedArray),encoding="utf8");
+/*oilseedArray.map(function(item){
 	console.log(item);
 
-});
-//For the year 2013, plot the all the Foodgrains type vs. production, in descending order.
+});*/
+
 var foodgrainsArray=[];
 lineByLine.map(function(item)
 	{   
@@ -79,13 +79,13 @@ lineByLine.map(function(item)
   return b.value - a.value;
 });
 
-fs.writeFileSync("JsonFiles/foodgrains.json",JSON.stringify(foodgrainsArray),encoding="utf8");
+//fs.writeFileSync("JsonFiles/foodgrains.json",JSON.stringify(foodgrainsArray),encoding="utf8");
 /*foodgrainsArray.map( function(item) {
     
      console.log(item)
 	});*/
 
-//Aggregate all commercial crops and plot the aggregated value vs. year. Note: assume a value of 0 for “NA”.
+
 var commercial=[];
 lineByLine.map(function(item)
 	{   
@@ -148,6 +148,7 @@ lineByLine.map(function(item)
 	     			//console.log(commercial[j].value[i].value);
 	     			sum+=parseFloat(commercial[j].value[i].value);
 	     	}
+	     	if(sum>0)
 	     	total.value.push({year:year+i,total:sum}); 
 	     }
 	
@@ -158,76 +159,86 @@ lineByLine.map(function(item)
     
      console.log(item);
 	});*/
-//Plot a stacked chart of rice production in the 4 southern states. Note. In this time period the data is for undivided Andhra Pradesh.
+
 var stateData=[];
 for (var i = Index1993; i<= Index2013; i++) {
   var year = 1993;
-
+  var Year,totalAp=0,totalKa=0,totalTn=0,totalKe=0;
 lineByLine.map(function(item)
 	{   
 		
 		
 			data=item.split(',');
-					//console.log(data);
+					
 			
 					state=data[0].split(" Rice Volume")[1];
 					
-					//console.log(state);
+					
 					if(state==' Andhra Pradesh')
 					{
 						Year=year+i-Index1993;
-						totalAp=data[i].split(',');
 						
-						if(totalAp=='NA')
+						//console.log(totalAp);
+						totalAp=parseInt(data[i].split(','));
+						if(totalAp==' NA')
 						{
 							totalAp=0;
 						}
+						
 					}
 					if(state==' Kerala')
 					{
 						Year=year+i-Index1993;
-						totalAp=data[i].split(',');
+						
 						//totalAp=0;
-						if(totalAp=='NA')
+						//console.log(totalKe);
+						if(totalKe==' NA')
 						{
-							totalAp=0;
+							totalKe=0;
 						}
+						totalKe=parseInt(data[i].split(','));
 						
 					}
 					if(state==' Karnataka')
 					{
 						Year=year+i-Index1993;
-						totalAp=data[i].split(',');
-						//totalAp=0;
-						if(totalAp=='NA')
-						{
-							totalAp=0;
-						}
 						
+						//totalAp=0;
+						//console.log(totalKa);
+						if(totalKa==' NA')
+						{
+							totalKa=0;
+						}
+						totalKa=parseInt(data[i].split(','));
 					}
 					if(state==' Tamil Nadu')
 					{
 						Year=year+i-Index1993;
-						totalAp=data[i].split(',');
-						//totalAp=0;
-						if(totalAp=='NA')
-						{
-							totalAp=0;
-						}
 						
+						//totalAp=0;
+						//console.log(totalTn);
+						if(totalTn==' NA')
+						{
+							totalTn=0;
+						}
+						totalTn=parseInt(data[i].split(','));
 					}
 					//total.push(data[0]+":"+data[j+1]);
 					
 				
 				
 			
-
+//stateData.push({Year:Year,AndhraPradesh:totalAp,Kerala:totalAp,Karnataka:totalAp,TamilNadu:totalAp});
 
 	});
-stateData.push({Year:Year,AndhraPradesh:totalAp,Kerala:totalAp,Karnataka:totalAp,TamilNadu:totalAp});
+if((totalAp>0)&&(totalKe>0)&&(totalTn>0)&&(totalKa>0))
+{
+stateData.push({Year:Year,AndhraPradesh:totalAp,Kerala:totalKe,Karnataka:totalKa,TamilNadu:totalTn});
+}
 	}
+	
 	fs.writeFileSync("JsonFiles/stateData.json",JSON.stringify(stateData),encoding="utf8");
-
+//fs.writeFileSync("Oilseeds.json",JSON.stringify(oilseedArray),encoding="utf8");
 /*stateData.map( function(item) {
     
      console.log(item);
